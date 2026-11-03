@@ -9,7 +9,7 @@ $dotenv->safeLoad();
 
 // Frontend allowed to access this backend.
 // Replace this with your actual Railway frontend domain.
-const FRONTEND_ORIGIN = 'https://your-frontend.up.railway.app';
+const FRONTEND_ORIGIN = 'https://threejs-assessment.vercel.app';
 
 // Configure CORS.
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
