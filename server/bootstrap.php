@@ -30,7 +30,7 @@ ini_set('session.gc_maxlifetime', (string)$idleTimeout);
 session_set_cookie_params([
     'lifetime' => $idleTimeout,
     'httponly' => true,
-    'secure' => false, // Change to true when using HTTPS
+    'secure' => true, // Change to true when using HTTPS
     'samesite' => 'Lax',
     'path' => '/',
 ]);
