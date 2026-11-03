@@ -3,7 +3,7 @@
     auto_https off
 }
 
-:{$PORT:8080} {
+:{$PORT:10000} {
     root * /app/server
 
     encode zstd gzip
