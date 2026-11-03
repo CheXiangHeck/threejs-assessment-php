@@ -3,12 +3,13 @@
 // Load Composer dependencies.
 require __DIR__ . '/../vendor/autoload.php';
 
-// Load environment variables safely.
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+// Load environment variables from the project root.
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->safeLoad();
 
 // Frontend allowed to access this backend.
-const FRONTEND_ORIGIN = 'https://threejs-assessment.vercel.app';
+// Replace this with your actual Railway frontend domain.
+const FRONTEND_ORIGIN = 'https://your-frontend.up.railway.app';
 
 // Configure CORS.
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -21,7 +22,7 @@ if ($origin === FRONTEND_ORIGIN) {
     header('Vary: Origin');
 }
 
-// Handle browser CORS preflight requests before starting a session.
+// Handle CORS preflight requests before starting a session.
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
@@ -35,7 +36,21 @@ $idleTimeout = 2592000; // 30 days
 
 ini_set('session.gc_maxlifetime', (string) $idleTimeout);
 
-// Configure session cookie before session_start().
+// Configure persistent session storage.
+// Railway Volume must be mounted at /data.
+$sessionPath = '/data/sessions';
+
+if (!is_dir($sessionPath)) {
+    mkdir($sessionPath, 0700, true);
+}
+
+if (!is_writable($sessionPath)) {
+    throw new RuntimeException('PHP session directory is not writable.');
+}
+
+ini_set('session.save_path', $sessionPath);
+
+// Configure session cookie.
 session_set_cookie_params([
     'lifetime' => $idleTimeout,
     'path' => '/',
@@ -44,7 +59,7 @@ session_set_cookie_params([
     'samesite' => 'None',
 ]);
 
-// Start the session only if one has not already been started.
+// Start the session.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
