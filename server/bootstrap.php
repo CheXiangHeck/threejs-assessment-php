@@ -7,7 +7,7 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 // This is a safe load, if the .env file is missing, it will not throw error.
 $dotenv->safeLoad();
 
-const FRONTEND_ORIGIN = 'http://localhost:5173';
+const FRONTEND_ORIGIN = 'https://threejs-assessment.vercel.app';
 
 // Set headers for CORS and content type
 header('Content-Type: application/json');
