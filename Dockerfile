@@ -1,16 +1,13 @@
 
-FROM dunglas/frankenphp:1-php8.4-alpine AS base
+FROM dunglas/frankenphp:1-php8.4
 
 WORKDIR /app
 
+# Production PHP configuration
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Install Composer dependencies
-FROM base AS dependencies
-
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-RUN apk add --no-cache unzip
 
 COPY composer.json composer.lock ./
 
@@ -20,19 +17,17 @@ RUN composer install \
     --no-progress \
     --optimize-autoloader
 
-# Production runtime
-FROM base AS runtime
-
-COPY --from=dependencies /app/vendor ./vendor
-
+# Copy application dependencies and source files
 COPY Caddyfile /etc/caddy/Caddyfile
-
 COPY server ./server
 
-# Session storage directory
+# Create session storage directory
 RUN mkdir -p /var/data/sessions
 
-# Render's default web service port
+# Render port
+ENV PORT=10000
+
 EXPOSE 10000
 
-CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
+# Override the default entrypoint and start FrankenPHP directly
+ENTRYPOINT ["/usr/local/bin/frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
