@@ -1,0 +1,69 @@
+# =====================================
+# Environment variables / Secrets
+# =====================================
+.env
+.env.*
+!.env.example
+
+# =====================================
+# Frontend - Node.js / Vite
+# =====================================
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# npm / package manager logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# =====================================
+# Backend - PHP / Composer
+# =====================================
+vendor/
+
+# PHP runtime / temporary files
+*.log
+*.cache
+*.tmp
+*.temp
+
+# =====================================
+# Supabase local development
+# =====================================
+# Keep supabase/config.toml and migrations
+supabase/.branches/
+supabase/.temp/
+
+# =====================================
+# IDE / Editors
+# =====================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# =====================================
+# Operating System
+# =====================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =====================================
+# Testing / Coverage
+# =====================================
+coverage/
+.phpunit.cache/
+.phpunit.result.cache
+
+# =====================================
+# Local development
+# =====================================
+test-env.php
+.vercel

@@ -1,0 +1,6 @@
+{
+    "require": {
+        "vlucas/phpdotenv": "*"
+    },
+    "name": "vercel/docker-php"
+}
