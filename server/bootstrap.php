@@ -1,7 +1,7 @@
 <?php
 
 // Load Composer dependencies.
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
 // Load environment variables from the project root.
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
