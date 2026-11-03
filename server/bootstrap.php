@@ -1,46 +1,55 @@
 <?php
 
-// The vendor autolad will load all the dependencies required for the application. 
+// Load Composer dependencies.
 require __DIR__ . '/../vendor/autoload.php';
 
+// Load environment variables safely.
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-// This is a safe load, if the .env file is missing, it will not throw error.
 $dotenv->safeLoad();
 
+// Frontend allowed to access this backend.
 const FRONTEND_ORIGIN = 'https://threejs-assessment.vercel.app';
 
-// Set headers for CORS and content type
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: ' . FRONTEND_ORIGIN);
-header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+// Configure CORS.
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
+if ($origin === FRONTEND_ORIGIN) {
+    header('Access-Control-Allow-Origin: ' . FRONTEND_ORIGIN);
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Vary: Origin');
+}
+
+// Handle browser CORS preflight requests before starting a session.
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit;
 }
 
-// 30-day session
-$idleTimeout = 2592000;
+// Set JSON response content type.
+header('Content-Type: application/json; charset=utf-8');
 
-ini_set('session.gc_maxlifetime', (string)$idleTimeout);
+// Configure session lifetime.
+$idleTimeout = 2592000; // 30 days
 
-// The session cookie is a server side cookie. It will be sent to the client, but it will not be accessible via JavaScript.
-// The HttpOnly flag is unnecessary to do but considering it may require Google API in the future that most likely will send Access Token and Refresh Token, it is better to set the cookie as HttpOnly.
+ini_set('session.gc_maxlifetime', (string) $idleTimeout);
+
+// Configure session cookie before session_start().
 session_set_cookie_params([
     'lifetime' => $idleTimeout,
-    'httponly' => true,
-    'secure' => true, // Change to true when using HTTPS
-    'samesite' => 'Lax',
     'path' => '/',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
 ]);
 
-// This is preventing multiple session start errors.
+// Start the session only if one has not already been started.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// A void method that will send a JSON response with an error message and exit the script.
+// Send a JSON error response and terminate execution.
 function fail(int $code, string $message, array $details = []): never
 {
     http_response_code($code);
@@ -53,9 +62,12 @@ function fail(int $code, string $message, array $details = []): never
     exit;
 }
 
-// A void method that will send a JSON response with a success message and exit the script.
-function success(int $code, array $data): never {
+// Send a JSON success response and terminate execution.
+function success(int $code, array $data): never
+{
     http_response_code($code);
+
     echo json_encode($data);
+
     exit;
 }
