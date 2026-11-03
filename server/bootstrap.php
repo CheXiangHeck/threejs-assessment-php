@@ -36,8 +36,6 @@ $idleTimeout = 2592000; // 30 days
 
 ini_set('session.gc_maxlifetime', (string) $idleTimeout);
 
-// Configure persistent session storage.
-// Railway Volume must be mounted at /data.
 $sessionPath = '/var/data/sessions';
 
 if (!is_dir($sessionPath)) {
@@ -45,7 +43,7 @@ if (!is_dir($sessionPath)) {
 }
 
 if (!is_writable($sessionPath)) {
-    throw new RuntimeException('Session directory is not writable.');
+    throw new RuntimeException('PHP session directory is not writable.');
 }
 
 ini_set('session.save_path', $sessionPath);

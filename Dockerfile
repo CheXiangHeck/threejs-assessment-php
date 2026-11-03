@@ -1,43 +1,41 @@
-FROM dunglas/frankenphp:1-php8.4
+FROM php:8.4-apache
 
-WORKDIR /app
+WORKDIR /var/www/html
 
-# Production PHP configuration
-RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-
-# Install dependencies required by Composer
+# Install required PHP extensions and utilities
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         unzip \
         libzip-dev \
     && docker-php-ext-install zip \
+    && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy Composer files
+# Install PHP dependencies
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
 RUN composer install \
     --no-dev \
     --no-interaction \
     --no-progress \
     --optimize-autoloader
 
-# Copy application
-COPY Caddyfile /etc/caddy/Caddyfile
-COPY server ./server
+# Copy PHP application
+COPY server/ ./
 
-# Session storage
-RUN mkdir -p /var/data/sessions
+# Create persistent session directory
+RUN mkdir -p /var/data/sessions \
+    && chown -R www-data:www-data /var/data/sessions /var/www/html
 
-# Render uses PORT
-ENV PORT=10000
+# Apache normally uses port 80.
+# Render expects the application to listen on port 10000.
+RUN sed -ri 's/Listen 80/Listen 10000/g' /etc/apache2/ports.conf \
+    && sed -ri 's/<VirtualHost \*:80>/<VirtualHost *:10000>/g' \
+        /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 10000
 
-# Do NOT specify ENTRYPOINT.
-# FrankenPHP's image already provides its own entrypoint.
-CMD ["run", "--config", "/etc/caddy/Caddyfile"]
+CMD ["apache2-foreground"]
